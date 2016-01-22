@@ -21,7 +21,7 @@ setup(
     name='mapzen.whosonfirst.diff',
     namespace_packages=['mapzen', 'mapzen.whosonfirst', 'mapzen.whosonfirst.diff'],
     version=version,
-    description='Simple Python wrapper for Who\'s On First helper functions',
+    description='Python library for describing changes between versions of a Who\'s On First document',
     author='Mapzen',
     url='https://github.com/whosonfirst/py-mapzen-whosonfirst-diff',
     install_requires=[
