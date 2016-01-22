@@ -33,6 +33,7 @@ setup(
         ],
     packages=packages,
     scripts=[
+        'scripts/wof-diff',
         ],
     download_url='https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/releases/tag/' + version,
     license='BSD')

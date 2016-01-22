@@ -2,6 +2,7 @@
 __import__('pkg_resources').declare_namespace(__name__)
 
 import subprocess
+import logging
 import geojson
 import os
 import json
@@ -9,21 +10,25 @@ import hashlib
 
 import mapzen.whosonfirst.utils
 
-class diff:
+class compare:
 
-    def __init__(self):
+    def __init__(self, **kwargs):
 
-        self.wof = "/usr/local/mapzen/whosonfirst-data"
+        source = kwargs.get('source', None)
 
-    def compare(self, id, steps=1):
+        self.source = source
 
-        data = os.path.join(self.wof, "data")
+    def report(self, id, steps=1):
+
+        data = os.path.join(self.source, "data")
         current = mapzen.whosonfirst.utils.load(data, id)
 
         rel_path = mapzen.whosonfirst.utils.id2relpath(id)
         target = "HEAD~%d:data/%s" % (steps, rel_path)
 
-        cmd = [ "git", "-C", self.wof, "show", target ]
+        cmd = [ "git", "-C", self.source, "show", target ]
+        logging.debug(cmd)
+
         out = subprocess.check_output(cmd)
 
         previous = geojson.loads(out)
@@ -113,4 +118,4 @@ if __name__ == '__main__':
     import pprint
 
     d = diff()
-    print pprint.pformat(d.compare(101736545))
+    print pprint.pformat(d.compare(85922583))
