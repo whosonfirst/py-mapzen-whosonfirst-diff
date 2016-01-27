@@ -24,13 +24,31 @@ class compare:
         current = mapzen.whosonfirst.utils.load(data, id)
 
         rel_path = mapzen.whosonfirst.utils.id2relpath(id)
-        target = "HEAD~%d:data/%s" % (steps, rel_path)
 
-        cmd = [ "git", "-C", self.source, "show", target ]
-        logging.debug(cmd)
+        targets = [
+            "HEAD~%d:data/%s" % (steps, rel_path),
+            "HEAD:data/%s" % rel_path
+        ]
 
-        out = subprocess.check_output(cmd)
+        out = None
 
+        for target in targets:
+
+            cmd = [ "git", "-C", self.source, "show", target ]
+            logging.debug(cmd)
+
+            try:
+                _out = subprocess.check_output(cmd)
+
+                out = _out
+                break
+
+            except Exception, e:
+                logging.warning("failed generate report for %s, because %s" % (rel_path, e))
+
+        if not out:
+            raise Exception, "Failed to generate a report for %s (using HEAD~1 and HEAD)" % rel_path
+            
         previous = geojson.loads(out)
 
         """
