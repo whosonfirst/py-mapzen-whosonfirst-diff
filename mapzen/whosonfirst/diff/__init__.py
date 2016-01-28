@@ -21,6 +21,8 @@ class compare:
     def report(self, id, steps=1):
 
         data = os.path.join(self.source, "data")
+        data = (data,)
+
         current = mapzen.whosonfirst.utils.load(data, id)
 
         rel_path = mapzen.whosonfirst.utils.id2relpath(id)
