@@ -78,6 +78,8 @@ class compare:
             'hierarchy': False,
             'supersedes': False,
             'superseded_by': False,
+            'tbah': False,
+            'tbah_properties': []
         }
 
         changed_key = {
@@ -95,14 +97,19 @@ class compare:
             if changed.get(v, False):
                 report[k] = changed[v]
 
-        # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/2
+        ignorable_properties = [
+            'wof:created',
+            'wof:lastmodified',
+        ]
 
-        report['tbah'] = self.touched_by_a_human(previous, current)
-        
-        if len(report['tbah'].keys()) > 0:
-            report['is_tbah'] = True
-        else:
-            report['is_tbah'] = False
+        tbah_properties = []
+
+        # FILL UP tbah_properties HERE
+
+        if len(tbah_properties) > 0:
+
+            report['tbah'] = True
+            report['tbah_properties'] = tbah_properties
 
         print pprint.pformat(report)
         return report
