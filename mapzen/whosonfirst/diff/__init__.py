@@ -7,8 +7,11 @@ import geojson
 import os
 import json
 import hashlib
+import re
 
-import datetime
+# https://github.com/seperman/deepdiff
+# http://zepworks.com/blog/diff-it-to-digg-it/
+# https://deepdiff.readthedocs.io/en/latest/
 
 import deepdiff
 
@@ -19,7 +22,6 @@ class compare:
     def __init__(self, **kwargs):
 
         source = kwargs.get('source', None)
-
         self.source = source
 
     def report(self, id, steps=1):
@@ -65,14 +67,10 @@ class compare:
                                                                         'oldvalue': 1459361729}}}
         """
 
-        diff = deepdiff.DeepDiff(previous, current)
-
-        # import pprint
-        # print pprint.pformat(diff)
-        # print dir(diff)
+        diff = self.diff(previous, current)
 
         report = {
-            'details': str(diff),	# see the str-ification / DeepDiff objects are not JSON-serializable which is sad...
+            'details': diff,
             'geom': False,
             'concordances': False,
             'hierarchy': False,
@@ -90,12 +88,28 @@ class compare:
             "superseded_by": "root['properties']['wof:superseded_by']",
         }
 
+        # THINGS THAT HAVE CHANGED
+
         changed = diff['values_changed']
 
         for k, v in changed_key.items():
 
             if changed.get(v, False):
-                report[k] = changed[v]
+                report[k] = True
+
+        # THINGS THAT HAVE BEEN ADDED
+
+        for a in diff['dic_item_added']:
+
+            for k, v in changed_key.items():
+
+                if a.startswith(v):
+                    report[k] = True
+                    break
+
+        # TO DO - THINGS THAT HAVE BEEN REMOVED
+
+        # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/1
 
         ignorable_properties = [
             'wof:created',
@@ -103,15 +117,54 @@ class compare:
         ]
 
         tbah_properties = []
+        tbah_check = []
 
-        # FILL UP tbah_properties HERE
+        previous_props = previous['properties']
+        current_props = current['properties']
+
+        diff = self.diff(previous_props, current_props)
+
+        tbah_check.extend(diff['values_changed'].keys())
+        tbah_check.extend(diff['dic_item_added'])
+
+        #
+
+        p = re.compile("(?:\[(?:'([^\']+)'|(\d+))\])")
+
+        for k in tbah_check:
+
+            k = k.replace("root", "")
+
+            dot_k = []
+            dot_k_str = ""
+
+            ignore = False
+
+            for m in re.findall(p, k):
+
+                dict_key, list_index = m	# one of these will be ''
+
+                if dict_key != '':
+                    dot_k.append(dict_key)
+                else:
+                    dot_k.append(list_index)	# do we want some other syntax than "a number" ?
+                
+                dot_k_str = ".".join(dot_k)
+
+                if dot_k_str in ignorable_properties:
+                    ignore = True
+                    break
+
+            if ignore:
+                continue
+
+            tbah_properties.append(dot_k_str)
 
         if len(tbah_properties) > 0:
 
             report['tbah'] = True
             report['tbah_properties'] = tbah_properties
 
-        print pprint.pformat(report)
         return report
 
     def compare_geom(self, left, right):
@@ -138,17 +191,27 @@ class compare:
         hash.update(str_obj)
         return hash.hexdigest()
 
-    # work in progress
-    # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/3
+    def diff(self, previous, current):
 
-    def touched_by_a_human(self, previous, current):
+        # grrnrnnrnrnnnnrnnhhnnnn - for some reason we can't just type(v) == types.SetType
+        # https://github.com/seperman/deepdiff/blob/master/deepdiff/deepdiff.py#L274
 
-        tbah = []
+        isa_set = [
+            'dic_item_added',
+            'attribute_added',
+            'attribute_removed',
+            'set_item_removed',
+            'set_item_added',
+        ]
 
-        previous_props = previous.get('properties', {})
-        current_props = current.get('properties', {})
+        diff = deepdiff.DeepDiff(previous, current)
 
-        return {}
+        for k, v in diff.items():
+
+            if k in isa_set:
+                diff[k] = list(v)
+
+        return diff
 
 if __name__ == '__main__':
 
