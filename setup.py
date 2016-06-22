@@ -26,6 +26,7 @@ setup(
     url='https://github.com/whosonfirst/py-mapzen-whosonfirst-diff',
     install_requires=[
         'mapzen.whosonfirst.utils>=0.19',
+        'deepdiff',
         'geojson',
         ],
     dependency_links=[

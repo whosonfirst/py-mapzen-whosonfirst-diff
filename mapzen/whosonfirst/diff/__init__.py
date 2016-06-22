@@ -7,8 +7,10 @@ import geojson
 import os
 import json
 import hashlib
+
 import datetime
-import types
+
+import deepdiff
 
 import mapzen.whosonfirst.utils
 
@@ -154,8 +156,17 @@ class compare:
         previous_props = previous.get('properties', {})
         current_props = current.get('properties', {})
 
-        previous_fields = previous_props.keys()
-        current_fields = current_props.keys()
+        """
+        wof-diff -s /usr/local/data/whosonfirst-data/ 102147495
+        {'dic_item_added': set([u"root['mz:hierarchy_label']", u"root['wof:repo']"]),
+        'values_changed': {u"root['wof:lastmodified']": {'newvalue': 1466609804,
+                                                  'oldvalue': 1459361729}}}
+        """
+
+        d = deepdiff.DeepDiff(previous_props, current_props)
+
+        import pprint
+        print pprint.pformat(d)
 
         return {}
 
