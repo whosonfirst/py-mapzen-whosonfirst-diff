@@ -7,6 +7,8 @@ import geojson
 import os
 import json
 import hashlib
+import datetime
+import types
 
 import mapzen.whosonfirst.utils
 
@@ -146,6 +148,15 @@ class compare:
     # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/3
 
     def touched_by_a_human(self, previous, current):
+
+        tbah = []
+
+        previous_props = previous.get('properties', {})
+        current_props = current.get('properties', {})
+
+        previous_fields = previous_props.keys()
+        current_fields = current_props.keys()
+
         return {}
 
 if __name__ == '__main__':
