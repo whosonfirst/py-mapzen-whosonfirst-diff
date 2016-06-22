@@ -59,14 +59,6 @@ class compare:
             
         previous = geojson.loads(out)
 
-        """
-        wof-diff -s /usr/local/data/whosonfirst-data/ 102147495
-        {'dic_item_added': set([u"root['properties']['mz:hierarchy_label']",
-                                u"root['properties']['wof:repo']"]),
-         'values_changed': {u"root['properties']['wof:lastmodified']": {'newvalue': 1466610665,
-                                                                        'oldvalue': 1459361729}}}
-        """
-
         diff = self.diff(previous, current)
 
         report = {
@@ -90,6 +82,15 @@ class compare:
 
         # THINGS THAT HAVE CHANGED
 
+        """
+        "values_changed": {
+        	"root['properties']['wof:lastmodified']": {
+        		"newvalue": 1466619352, 
+        		"oldvalue": 1459361729
+        	}
+        }
+        """
+
         changed = diff['values_changed']
 
         for k, v in changed_key.items():
@@ -98,6 +99,14 @@ class compare:
                 report[k] = True
 
         # THINGS THAT HAVE BEEN ADDED
+
+        """
+        "dic_item_added": [
+        	"root['properties']['mz:hierarchy_label']", 
+        	"root['properties']['wof:concordances']['foo:bar']", 
+        	"root['properties']['wof:repo']"
+        ]
+        """
 
         for a in diff['dic_item_added']:
 
@@ -108,6 +117,7 @@ class compare:
                     break
 
         # TO DO - THINGS THAT HAVE BEEN REMOVED
+        # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/5
 
         # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/1
 
@@ -118,6 +128,9 @@ class compare:
 
         tbah_properties = []
         tbah_check = []
+
+        # Honestly, we could just update the 'replace' command below to
+        # remove "root['properties']" but whatever... (20160622/thisisaaronland)
 
         previous_props = previous['properties']
         current_props = current['properties']
@@ -167,12 +180,16 @@ class compare:
 
         return report
 
+    # deprecated ?
+
     def compare_geom(self, left, right):
 
         left_hash = mapzen.whosonfirst.utils.hash_geom(left)
         right_hash = mapzen.whosonfirst.utils.hash_geom(right)
 
         return left_hash != right_hash
+
+    # deprecated ?
 
     def compare_object(self, left_obj, right_obj):
 
@@ -181,7 +198,7 @@ class compare:
 
         return left_hash != right_hash
 
-    # put this in utils? probably...
+    # deprecated ?
 
     def hash_obj(self, obj):
 
@@ -192,6 +209,9 @@ class compare:
         return hash.hexdigest()
 
     def diff(self, previous, current):
+
+        # This is all so that we can serialize the diff response as JSON
+        # (20160622/thisisaaronland)
 
         # grrnrnnrnrnnnnrnnhhnnnn - for some reason we can't just type(v) == types.SetType
         # https://github.com/seperman/deepdiff/blob/master/deepdiff/deepdiff.py#L274
