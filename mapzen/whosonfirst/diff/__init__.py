@@ -58,65 +58,54 @@ class compare:
         previous = geojson.loads(out)
 
         """
-
-        If maybe I had even the vaguest of ideas what this error message even
-        meant we might try using this but as it is... (20160122/thisisaaronland)
-
-        diff = json_delta.udiff(previous, current)
-
-        Traceback (most recent call previous):
-        File "./__init__.py", line 33, in <module>
-        d.compare(101736545)
-        File "./__init__.py", line 27, in compare
-        diff = json_delta.udiff(previous, current)
-        File "build/bdist.linux-x86_64/egg/json_delta/_udiff.py", line 92, in udiff
-        File "build/bdist.linux-x86_64/egg/json_delta/_diff.py", line 72, in diff
-        File "build/bdist.linux-x86_64/egg/json_delta/_diff.py", line 128, in needle_diff
-        File "build/bdist.linux-x86_64/egg/json_delta/_diff.py", line 299, in keyset_diff
-        File "build/bdist.linux-x86_64/egg/json_delta/_diff.py", line 269, in compute_keysets
-        AssertionError: {"bbox": [-73.97435119999994, 45.40965310900003, -73.47412679299993, 
+        wof-diff -s /usr/local/data/whosonfirst-data/ 102147495
+        {'dic_item_added': set([u"root['properties']['mz:hierarchy_label']",
+                                u"root['properties']['wof:repo']"]),
+         'values_changed': {u"root['properties']['wof:lastmodified']": {'newvalue': 1466610665,
+                                                                        'oldvalue': 1459361729}}}
         """
 
-        changes = {}
+        diff = deepdiff.DeepDiff(previous, current)
 
-        changes['geom'] = self.compare_geom(previous, current)
+        # import pprint
+        # print pprint.pformat(diff)
+        # print dir(diff)
+
+        report = {
+            'details': str(diff),	# see the str-ification / DeepDiff objects are not JSON-serializable which is sad...
+            'geom': False,
+            'concordances': False,
+            'hierarchy': False,
+            'supersedes': False,
+            'superseded_by': False,
+        }
+
+        changed_key = {
+            "geom": "root['geometry']",
+            "concordances": "root['properties']['wof:concordances']",
+            "hierarchy": "root['properties']['wof:hierarchy']",
+            "supersedes": "root['properties']['wof:supersedes']",
+            "superseded_by": "root['properties']['wof:superseded_by']",
+        }
+
+        changed = diff['values_changed']
+
+        for k, v in changed_key.items():
+
+            if changed.get(v, False):
+                report[k] = changed[v]
 
         # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/2
 
-        changes['tbah'] = self.touched_by_a_human(previous, current)
-
-        if len(changes['tbah'].keys()) > 0:
-            changes['is_tbah'] = True
+        report['tbah'] = self.touched_by_a_human(previous, current)
+        
+        if len(report['tbah'].keys()) > 0:
+            report['is_tbah'] = True
         else:
-            changes['is_tbah'] = False
+            report['is_tbah'] = False
 
-        #
-
-        previous_props = previous.get('properties', {})
-        current_props = current.get('properties', {})
-        changes['properties'] = self.compare_object(previous_props, current_props)
-
-        #
-
-        wof = {
-            'concordances': {},
-            'hierarchy': [],
-            'supersedes': [],
-            'superseded_by': []
-        }
-
-        for k, v in wof.items():
-
-            wof_k = "wof:%s" % k
-
-            previous_el = previous_props.get(wof_k, {})
-            current_el = current_props.get(wof_k, {})
-
-            changes[k] = self.compare_object(previous_el, current_el)
-
-        #
-
-        return changes
+        print pprint.pformat(report)
+        return report
 
     def compare_geom(self, left, right):
 
@@ -124,10 +113,6 @@ class compare:
         right_hash = mapzen.whosonfirst.utils.hash_geom(right)
 
         return left_hash != right_hash
-
-    def compare_object_itemized(self, left, right):
-        # please write me...
-        pass
 
     def compare_object(self, left_obj, right_obj):
 
@@ -155,18 +140,6 @@ class compare:
 
         previous_props = previous.get('properties', {})
         current_props = current.get('properties', {})
-
-        """
-        wof-diff -s /usr/local/data/whosonfirst-data/ 102147495
-        {'dic_item_added': set([u"root['mz:hierarchy_label']", u"root['wof:repo']"]),
-        'values_changed': {u"root['wof:lastmodified']": {'newvalue': 1466609804,
-                                                  'oldvalue': 1459361729}}}
-        """
-
-        d = deepdiff.DeepDiff(previous_props, current_props)
-
-        import pprint
-        print pprint.pformat(d)
 
         return {}
 
