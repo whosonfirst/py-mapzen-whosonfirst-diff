@@ -77,6 +77,15 @@ class compare:
 
         changes['geom'] = self.compare_geom(previous, current)
 
+        # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/2
+
+        changes['tbah'] = self.touched_by_a_human(previous, current)
+
+        if len(changes['tbah'].keys()) > 0:
+            changes['is_tbah'] = True
+        else:
+            changes['is_tbah'] = False
+
         #
 
         previous_props = previous.get('properties', {})
@@ -132,6 +141,12 @@ class compare:
         hash = hashlib.md5()
         hash.update(str_obj)
         return hash.hexdigest()
+
+    # work in progress
+    # https://github.com/whosonfirst/py-mapzen-whosonfirst-diff/issues/3
+
+    def touched_by_a_human(self, previous, current):
+        return {}
 
 if __name__ == '__main__':
 
