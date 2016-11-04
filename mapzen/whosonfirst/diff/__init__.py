@@ -88,7 +88,7 @@ class compare:
         }
         """
 
-        changed = diff['values_changed']
+        changed = diff.get('values_changed', {})
 
         for k, v in changed_key.items():
 
@@ -105,7 +105,7 @@ class compare:
         ]
         """
 
-        for a in diff['dic_item_added']:
+        for a in diff.get('dic_item_added', []):
 
             for k, v in changed_key.items():
 
@@ -134,8 +134,8 @@ class compare:
 
         diff = self.diff(previous_props, current_props)
 
-        tbah_check.extend(diff['values_changed'].keys())
-        tbah_check.extend(diff['dic_item_added'])
+        tbah_check.extend(diff.get('values_changed', {}).keys())
+        tbah_check.extend(diff.get('dic_item_added', []))
 
         #
 
@@ -174,6 +174,9 @@ class compare:
 
             report['tbah'] = True
             report['tbah_properties'] = tbah_properties
+
+        count = len(diff.get('values_changed', {}).keys()) + len(diff.get('dic_item_added', []))
+        report['count_changed'] = count
 
         return report
 
