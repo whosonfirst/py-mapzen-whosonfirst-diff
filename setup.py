@@ -19,7 +19,7 @@ desc = open("README.md").read()
 
 setup(
     name='mapzen.whosonfirst.diff',
-    namespace_packages=['mapzen', 'mapzen.whosonfirst', 'mapzen.whosonfirst.diff'],
+    namespace_packages=['mapzen', 'mapzen.whosonfirst'],
     version=version,
     description='Python library for describing changes between versions of a Who\'s On First document',
     author='Mapzen',
