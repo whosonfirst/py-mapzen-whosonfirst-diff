@@ -105,7 +105,27 @@ class compare:
         ]
         """
 
+        # older versions of deepdif
+
         for a in diff.get('dic_item_added', []):
+
+            for k, v in changed_key.items():
+
+                if a.startswith(v):
+                    report[k] = True
+                    break
+
+        # newer versions of deepdif (this is why we can't have nice things...)
+
+        for a in diff.get('dictionary_item_added', []):
+
+            for k, v in changed_key.items():
+
+                if a.startswith(v):
+                    report[k] = True
+                    break
+
+        for a in diff.get('iterableo_item_added', []):
 
             for k, v in changed_key.items():
 
