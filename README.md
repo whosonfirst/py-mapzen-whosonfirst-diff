@@ -4,11 +4,19 @@ Python library for describing changes between versions of a Who\'s On First docu
 
 This is *not* a full-featured diff tool. It may become one over time but for the time being it is meant to compare a "most-recent"  Who's On First document with the last version commited to Git and to generate enough information to determine whether any related tasks need to be triggered (for example rebuilding the concordances list).
 
-## Caveats
+## Install
 
-This is probably not ready for you to use yet. No.
+```
+sudo pip install -r requirements.txt --process-dependency-links
+```
 
-## But if you're feeling lucky
+### Caveats
+
+This won't work without `--process-dependency-links` so I am not sure yet what happens when it gets removed from pip 1.6...
+
+## Usage
+
+This is probably not ready for you to use yet. No. But if you're feeling lucky...
 
 ### From the command line:
 

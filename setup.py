@@ -24,14 +24,6 @@ setup(
     description='Python library for describing changes between versions of a Who\'s On First document',
     author='Mapzen',
     url='https://github.com/whosonfirst/py-mapzen-whosonfirst-diff',
-    install_requires=[
-        'mapzen.whosonfirst.utils>=0.19',
-        'deepdiff',
-        'geojson',
-        ],
-    dependency_links=[
-        'https://github.com/whosonfirst/py-mapzen-whosonfirst-utils/tarball/master#egg=mapzen.whosonfirst.utils-0.19',
-        ],
     packages=packages,
     scripts=[
         'scripts/wof-diff',
