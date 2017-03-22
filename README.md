@@ -7,7 +7,7 @@ This is *not* a full-featured diff tool. It may become one over time but for the
 ## Install
 
 ```
-sudo pip install -r requirements.txt --process-dependency-links
+sudo pip install -r requirements.txt --process-dependency-links .
 ```
 
 ### Caveats
